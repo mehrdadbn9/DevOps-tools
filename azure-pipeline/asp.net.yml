@@ -1,0 +1,187 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+- develop
+- feature/*
+- bug/*
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: 'Release'
+  dotNetFramework: 'net6.0'
+  dotNetVersion: '6.0.x'
+  targetRuntime: 'linux-x64'
+  azureSubscription: 'Inform-your-subscription'
+
+stages:
+- stage: Build
+
+  jobs:
+  - job: build
+
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET 6 sdk'
+      inputs:
+        packageType: 'sdk'
+        version: $(dotNetVersion)
+        includePreviewVersions: true
+
+    - task: DotNetCoreCLI@2
+      displayName: Build solution
+      inputs:
+        command: 'build'
+        projects: '**/*.sln'
+        arguments: '--configuration $(buildConfiguration)'
+
+    # Task to run unit tests;
+    # - task: DotNetCoreCLI@2
+    #   displayName: Run unit tests
+    #   inputs:
+    #    command: 'test'
+    #    projects: '**/*Tests/*.csproj'
+    #    arguments: '--configuration $(buildConfiguration)'
+
+    # Publish it as .NET 6 self-contained application for linux runtime
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: publish
+        publishWebProjects: True
+        arguments: '--configuration $(BuildConfiguration) --framework $(dotNetFramework) --runtime $(targetRuntime) --self-contained --output $(Build.ArtifactStagingDirectory)'
+        zipAfterPublish: True
+
+    # Package the file and uploads them as an artifact of the build
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: 'replacetokensbackend'
+        publishLocation: 'pipeline'
+
+- stage: Development
+  displayName: 'Deploy to Development'
+  dependsOn: Build
+  condition: succeeded()
+  variables:
+    - group: development
+
+  jobs:
+  - deployment: DeploymentDevelopment
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: Development
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          # Replace tokens;
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: '$(Pipeline.Workspace)/**/*.zip'
+              destinationFolder: '$(Pipeline.Workspace)/application'
+              cleanDestinationFolder: true
+              overwriteExistingFiles: false
+
+          - task: replacetokens@5
+            inputs:
+              targetFiles: '$(Pipeline.Workspace)/application/appsettings*.json'
+              encoding: 'auto'
+              tokenPattern: 'default'
+              writeBOM: true
+              actionOnMissing: 'warn'
+              keepToken: false
+              actionOnNoFiles: 'continue'
+              enableTransforms: false
+              enableRecursion: false
+              useLegacyPattern: false
+              enableTelemetry: true
+
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: '$(Pipeline.Workspace)/drop/'
+              Contents: '*.zip'
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: '$(Pipeline.Workspace)/application/'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              replaceExistingArchive: true
+          # //Replace tokens;
+
+          - task: AzureWebApp@1
+            displayName: 'Deploy App Service'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: 'webAppLinux'
+              appName: 'dev-replace-tokens-api'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
+              runtimeStack: 'DOTNETCORE|6.0'
+
+- stage: Production
+  displayName: 'Deploy to Production'
+  dependsOn: [ Development ]
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  variables:
+  - group: production
+  jobs: 
+  - deployment: DeploymentJob
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: Production
+    strategy:
+     runOnce:
+        deploy:
+          steps:
+
+          # Replace tokens;
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: '$(Pipeline.Workspace)/**/*.zip'
+              destinationFolder: '$(Pipeline.Workspace)/application'
+              cleanDestinationFolder: true
+              overwriteExistingFiles: false
+
+          - task: replacetokens@5
+            inputs:
+              targetFiles: '$(Pipeline.Workspace)/application/appsettings*.json'
+              encoding: 'auto'
+              tokenPattern: 'default'
+              writeBOM: true
+              actionOnMissing: 'warn'
+              keepToken: false
+              actionOnNoFiles: 'continue'
+              enableTransforms: false
+              enableRecursion: false
+              useLegacyPattern: false
+              enableTelemetry: true
+
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: '$(Pipeline.Workspace)/drop/'
+              Contents: '*.zip'
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: '$(Pipeline.Workspace)/application/'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              replaceExistingArchive: true
+          # //Replace tokens;
+
+          - task: AzureWebApp@1
+            displayName: 'Deploy App Service'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: 'webAppLinux'
+              appName: 'prd-replace-tokens-api'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
+              runtimeStack: 'DOTNETCORE|6.0'

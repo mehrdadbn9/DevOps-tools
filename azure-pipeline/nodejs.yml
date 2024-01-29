@@ -1,0 +1,170 @@
+# Node.js with Angular
+# Build a Node.js project that uses Angular.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- master
+- develop
+- feature/*
+- bug/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  azureSubscription: 'Inform-your-subscription'
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '16.x'
+        displayName: 'Install Node.js 16.x'
+
+      - script: |
+          cd ReplaceTokens-SPA/
+          npm install -g @angular/cli
+          npm install
+          ng build --prod
+        displayName: 'npm install and build'
+        workingDirectory: '$(Build.SourcesDirectory)'
+      # - task: CmdLine@2
+      #   displayName: "Run unit tests"
+      #   inputs:
+      #     script: |
+      #       cd ReplaceTokens-SPA/
+      #       ng test --browsers=ChromeHeadless --code-coverage --watch=false
+
+      - task: ArchiveFiles@2
+        displayName: 'Archive files'
+        inputs:
+          rootFolderOrFile: '$(System.DefaultWorkingDirectory)/dist/replace-tokens-spa/'
+          includeRootFolder: false
+          archiveType: zip
+          archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+          replaceExistingArchive: true
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+          ArtifactName: 'drop'
+          publishLocation: 'Container'
+
+- stage: Development
+  displayName: 'Deploy to Development'
+  dependsOn: Build
+  condition: succeeded()
+  variables:
+    - group: development
+  jobs:
+  - deployment: DeploymentDevelopment
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: Development
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          # Replace Tokens;
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              destinationFolder: '$(System.DefaultWorkingDirectory)/development'
+              cleanDestinationFolder: true
+              overwriteExistingFiles: false
+
+          - task: replacetokens@5
+            inputs:
+              targetFiles: '$(System.DefaultWorkingDirectory)/development/main*.js'
+              encoding: 'auto'
+              tokenPattern: 'default'
+              writeBOM: true
+              actionOnMissing: 'warn'
+              keepToken: false
+              actionOnNoFiles: 'continue'
+              enableTransforms: false
+              enableRecursion: false
+              useLegacyPattern: false
+              enableTelemetry: true
+              
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: '$(System.DefaultWorkingDirectory)/development'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              replaceExistingArchive: true
+
+          - task: AzureWebApp@1
+            displayName: 'Deploy App Service'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: 'webAppLinux'
+              appName: 'dev-replace-tokens-spa'
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              runtimeStack: 'NODE|16-lts'
+          # //Replace Tokens;
+
+- stage: Production
+  displayName: 'Deploy to Production'
+  dependsOn: [ Development ]
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  variables:
+    - group: production
+  jobs: 
+  - deployment: DeploymentJob
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          # Replace Tokens;
+           - task: ExtractFiles@1
+             inputs:
+              archiveFilePatterns: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              destinationFolder: '$(System.DefaultWorkingDirectory)/production'
+              cleanDestinationFolder: true
+              overwriteExistingFiles: false
+
+           - task: replacetokens@5
+             inputs:
+              targetFiles: '$(System.DefaultWorkingDirectory)/production/main*.js'
+              encoding: 'auto'
+              tokenPattern: 'default'
+              writeBOM: true
+              actionOnMissing: 'warn'
+              keepToken: false
+              actionOnNoFiles: 'continue'
+              enableTransforms: false
+              enableRecursion: false
+              useLegacyPattern: false
+              enableTelemetry: true
+              
+           - task: ArchiveFiles@2
+             inputs:
+              rootFolderOrFile: '$(System.DefaultWorkingDirectory)/production'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              replaceExistingArchive: true
+
+           - task: AzureWebApp@1
+             displayName: 'Deploy App Service'
+             inputs:
+               azureSubscription: $(azureSubscription)
+               appType: 'webAppLinux'
+               appName: 'prd-replace-tokens-spa'
+               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+               runtimeStack: 'NODE|16-lts'
+          # //Replace Tokens;
