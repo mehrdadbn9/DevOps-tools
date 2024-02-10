@@ -9,7 +9,6 @@ kubectl expose pod nginx --type=NodePort --port=80
  kubectl port-forward nginx 8080 80
 ```
 ![alt text](images/docker-context.png)
-
 ## command in container
 ```bash
 docker container run centos ping -c 5 127.0.0.1
@@ -93,51 +92,89 @@ docker image history my-alipine
 ```
 ##
 ```bash
-
+RUN tar -xJC /usr/src/python --strip-components=1 -f python.tar.xz
 ```
 ##
 ```bash
+RUN apt-get update \
+&& apt-get install -y --no-install-recommends \
+ca-certificates \
+libexpat1 \
+libffi6 \
+libgdbm3 \
+libreadline7 \
+libsqlite3-0 \
+libssl1.1 \
+&& rm -rf /var/lib/apt/lists/*
+```
+## ADD
+### ADD keyword also lets us copy and
+unpack TAR files, as well as provide an URI as a source for the files and folders to copy
+
+inside the
+image will have a user ID (UID) and a group ID (GID) of 0.
+```bash
+
+ADD sample.tar /app/bin/
+ADD http://example.com/sample.txt /data/
+ADD --chown=11:22 ./data/web* /app/data/
+```
+## name space
+![namespace](image.png)
+```bash
+sudo ls /proc/1/ns 
+cgroup	mnt  pid	       time		  user
+ipc	net  pid_for_children  time_for_children  uts(hostname and NIS domain name)
 
 ```
-##
+###  ENTRYPOINT is used to define the command of the expression
+### CMD is used to define the parameters for the command
+
+```bash
+ENTRYPOINT [ "ping" ]
+CMD [ "-c", "3", "8.8.8.8" ]
+
+ENTRYPOINT ["npm"]
+CMD ["start"]
+```
+## 8 namespaces
+![namespace](image-1.png)
+![API sys call](image-2.png)
+![clone at docker run](image-3.png)
 ```bash
 
 ```
-##
+## Saving and loading images
 ```bash
-
+docker image save -o ./backup/my-alpine.tar my-alpine
+docker image load -i ./backup/my-alpine.tar
+```
+ Enterprise Service Bus (ESB)
+## lsns
+```bash
+lsns
+pstree
+nspawn --->s part of the systemd system and service manager suite. It is used for managing lightweight containers on Linux systems
 ```
 ##
 ```bash
-
+RUN mvn --clean install
 ```
 ##
 ```bash
-
+ENV baz=123
+EXPOSE 5000
+EXPOSE 15672/tcp
+ENTRYPOINT java -jar pet-shop.war
 ```
-##
+## return on investment (ROI) 
 ```bash
-
+• More than a 50% saving in maintenance costs
+• Up to a 90% reduction in the time between the deployments of new releases
 ```
-##
+## docker tag
 ```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
-
+docker image tag alpine:latest gnschenker/alpine:1.0
 ```
 ##
 ```bash
