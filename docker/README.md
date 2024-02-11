@@ -178,42 +178,67 @@ docker image tag alpine:latest gnschenker/alpine:1.0
 ```
 ##
 ```bash
+$ docker container run -it --privileged --pid=host \
+debian nsenter -t 1 -m -u -n -i sh
+nsenter -t 1 -m -u -n -i sh
 
+```
+## development.config
+```bash
+LOG_DIR=/var/log/my-log
+MAX_LOG_FILES=5
+MAX_LOG_SIZE=1G
 ```
 ##
 ```bash
+docker container run --rm -it \
+--env-file ./development.config \
+alpine sh -c "export | grep LOG"
+```
+## Environment variables at build time
+```bash
+ARG BASE_IMAGE_VERSION=12.7-stretch
+FROM node:${BASE_IMAGE_VERSION}
+```
+## Auto-restarting for Node.js
+```bash
+ npm install -g nodemon
+```
+## java
+
+### To add auto-restart support to our Java Spring Boot application, we need to add the so-called dev tools:
+### I. Locate the pom.xml file in your Java project and open it in the editor.
+### II. Add the following snippet to the dependencies section of the file:
+
+### When using Python, we can also use nodemon to have our application auto-restart when any
+changes are made to the code. For example, assume that your command to start the Python
+application is python main.py. In this case, you would just use nodemon like so:
+```bash
+$ nodemon --exec python3 main.py
+```
+## Auto-restarting for .NET
+```bash
+$ dotnet new webapi -o csharp-sample
+$ dotnet watch run
+Dockerfile-dev
+![.net dockerfile-dev](image-4.png)
+The dockerServerReadyAction property in the launch.json file of a .NET project
+in VS Code is used to specify an action that should be taken when a Docker container is ready
+to accept requests.
+![log level](image-5.png)
+```
+## python
+```bash
+![python logger](image-6.png)
 
 ```
-##
+## jaeger tracing
 ```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
-
-```
-##
-```bash
+1. generate log item (logger obj)
+2. wrap each method to trace with what Jaeger calls a span
+![span for .net](image-8.png)
+![child span](image-9.png)
+3. 
 
 ```
 ##
