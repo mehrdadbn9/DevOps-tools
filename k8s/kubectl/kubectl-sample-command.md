@@ -93,9 +93,18 @@ kubectl run httpd --image=httpd:alpine --port=80 --expose
 kubectl get pods --selector app=App1
 ```
 
+#### expose
 
+```bash
+kubectl expose pod redis --port=6379 --name redis-service
+```
+#### secret
 
-
+```bash
+kubectl get secrets
+kubectl describe secret
+kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+```
 
 
 
