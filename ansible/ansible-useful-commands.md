@@ -37,7 +37,7 @@ ansible localhost -m authorized_key -a "user=root key='ssh-rsa AAAA...XXX == roo
 ```
 
 ### Limit to one or more hosts
-This is required when one wants to run a playbook against a host group, but only against one or more members of that group.
+This is required when one wants to run a playbook against a host group, but only ag   ainst one or more members of that group.
 
 Limit to one host
 ```bash
