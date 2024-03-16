@@ -154,7 +154,7 @@ docker image load -i ./backup/my-alpine.tar
 ```bash
 lsns
 pstree
-nspawn --->s part of the systemd system and service manager suite. It is used for managing lightweight containers on Linux systems
+nspawn --->is part of the systemd system and service manager suite. It is used for managing lightweight containers on Linux systems
 ```
 ##
 ```bash
@@ -241,15 +241,17 @@ to accept requests.
 3. 
 
 ```
-##
+##unshare
 ```bash
-
+run program on new namespace
 ```
-##
+## security_opt
+ensures that processes in the container cannot gain new priviledge via 'setuid' or 'setgid'
 ```bash
-
+security_opy:
+  - no-new-priviledge:true
 ```
-##
+## 
 ```bash
 
 ```
