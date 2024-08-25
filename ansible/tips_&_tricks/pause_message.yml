@@ -1,0 +1,16 @@
+---
+- name: pause module demo
+  hosts: all
+  vars:
+    wait_seconds: 10
+  tasks:
+    - name: pause for {{ wait_seconds | int }} second(s)
+    ## The | int part is a Jinja2 filter that is used to convert the value of the wait_seconds variable to an integer before being used in the task.
+      ansible.builtin.pause:
+        seconds: "{{ wait_seconds | int }}"
+
+    - name: message
+      ansible.builtin.debug:
+        msg: "The end"
+
+# doc recomendation is: To pause/wait/sleep per host, use the ansible.builtin.wait_for module.

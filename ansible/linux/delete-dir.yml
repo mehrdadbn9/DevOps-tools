@@ -1,0 +1,11 @@
+---
+- name: file module demo
+  hosts: all
+  vars:
+    mypath: "/root/wordpress/nginx_3"
+  become: false
+  tasks:
+    - name: "{{ mypath }} not present"
+      ansible.builtin.file:
+        path: "{{ mypath }}"
+        state: "absent"

@@ -1,0 +1,20 @@
+---
+- name: lineinfile module demo
+  hosts: all
+  become: true
+  tasks:
+    - name: allow password authentication
+      ansible.builtin.lineinfile:
+        state: present
+        dest: /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        line: "PasswordAuthentication yes" #
+        validate: 'sshd -t -f %s' # %s if your sshd_config file is located at /etc/ssh/sshd_config, you would replace %s with that path automatically
+      notify: ssh restart
+
+  handlers:
+    - name: ssh restart
+      ansible.builtin.service:
+        name: sshd
+        state: restarted
+        

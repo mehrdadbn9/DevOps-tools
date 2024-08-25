@@ -1,0 +1,13 @@
+# command: ansible-playbook -i inventory.ini -vv debug.yml 
+---
+- name: debug module demo
+  hosts: all
+  vars:
+    type: "yml"
+  tasks:
+    - name: debug message
+      ansible.builtin.debug:
+        msg: "this is {{ type }} file"
+        verbosity: 2 
+        #with this verbosity we should add -vv in our command
+        

@@ -1,0 +1,32 @@
+---
+- name: git module demo
+  hosts: all
+  vars:
+    repo: git@github.com:mylogin/hello.git
+    dest: /home/mylogin/hello
+    sshkey: "~/.ssh/id_rsa"
+  tasks:
+    - name: ensure git pkg installed
+      ansible.builtin.yum:
+        name: git
+        state: present
+        update_cache: true # Run the equivalent of apt-get update before the operation
+      become: true
+
+    - name: checkout git repo
+      ansible.builtin.git:
+        repo: "{{ repo }}"
+        dest: "{{ dest }}"
+        key_file: "{{ sshkey }}"
+
+    - name: Example clone of a single branch
+      ansible.builtin.git:
+        repo: https://github.com/ansible/ansible-examples.git
+        dest: /src/ansible-examples
+        single_branch: yes
+        version: master # indicates that the playbook should clone the repository from the specified URL
+
+    - name: Remove "foo" package
+      ansible.builtin.apt:
+        name: foo
+        state: absent

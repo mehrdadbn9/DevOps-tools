@@ -1,0 +1,14 @@
+---
+- name: fetch module demo
+  hosts: all
+  become: true
+  vars:
+    log_file: "/var/log/syslog"
+    dump_dir: "logs"
+  tasks:
+    - name: fetch log
+      ansible.builtin.fetch:
+        src: "{{ log_file }}"
+        dest: "{{ dump_dir }}" # or using flat
+        validate_checksum: yes #default true
+        fail_on_missing: yes #default true

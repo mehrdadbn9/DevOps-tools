@@ -1,0 +1,11 @@
+---
+- name: Template module demo
+  hosts: all
+  vars:
+    fruit: "apple"
+    output: "output.txt"
+  tasks:
+    - name: Write to file
+      ansible.builtin.template:
+        src: "mytemplate.j2"
+        dest: "{{ output }}"

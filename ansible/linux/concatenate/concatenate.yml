@@ -1,0 +1,21 @@
+---
+- name: concatenate demo
+  hosts: "{{ HOSTS }}"
+  become: false
+  gather_facts: true
+  vars:
+    myinput: "concatenate/includes.yml" 
+    myoutput: "output.txt"
+  tasks:
+    - name: include file list
+      include_vars:
+        file: "{{ myinput }}"
+        name: files
+
+    - name: concatenate
+      ansible.builtin.template:
+        src: templates/concatenate.j2
+        dest: "{{ myoutput }}"
+      vars:
+        input_files: "{{ files.input_files }}" #important jinja2 need variable named input_files
+    

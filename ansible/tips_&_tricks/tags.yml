@@ -1,0 +1,16 @@
+---
+- name: tags
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: eg 1
+      ansible.builtin.debug:
+        msg: "eg 1"
+      tags:
+        - tag1
+    - name: eg 2
+      ansible.builtin.debug:
+      msg: "eg 2"
+
+
+# ansible-playbook -i inventory.ini --tags tag1 tags.yml

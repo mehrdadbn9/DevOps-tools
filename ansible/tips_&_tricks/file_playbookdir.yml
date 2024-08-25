@@ -1,0 +1,8 @@
+---
+- name: playbook_dir demo
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: print current playbook_dir
+    ansible.builtin.debug:
+      var: playbook_dir

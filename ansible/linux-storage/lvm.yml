@@ -1,0 +1,11 @@
+---
+- name: disk demo
+  hosts: all
+  become: true
+  tasks:
+    - name: create partition
+      community.general.parted:
+        device: /dev/vdb
+        number: 1
+        flags: [ lvm ]
+        state: present

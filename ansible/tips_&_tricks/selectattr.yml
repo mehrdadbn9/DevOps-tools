@@ -1,0 +1,19 @@
+---
+- name: selectattr demo
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: all features
+      ansible.builtin.debug:
+        var: 'ansible_facts.ens3.features'
+
+    - name: filter enabled
+      ansible.builtin.debug:
+        msg: "{{ (ansible_facts.ens3.features | dict2items | selectattr('value', 'match', '^(on|enabled)$')) }}"
+
+# ansible_facts.eth1.features retrieves the list of features from the gathered facts.
+#| dict2items converts the list of features (which are likely key-value pairs) into a list of dictionary items 
+# (each item is a dictionary with 'key' and 'value' keys).
+#| selectattr('value', 'match', '^(on|enabled)$') filters the list of dictionary items based on their 'value' 
+# attribute. The match parameter specifies a regular expression pattern to match against the 'value'. In this 
+# case, it matches values that start with 'on' or 'enabled' (case-insensitive).

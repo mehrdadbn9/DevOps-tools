@@ -1,0 +1,15 @@
+---
+- name: group module demo
+  hosts: all
+  become: true
+  vars:
+    myuser: "ubuntu_5"
+    mygroup:
+      - adm
+      - sys
+  tasks:
+    - name: append group
+      ansible.builtin.user: # user module not group
+        name: "{{ myuser}}"
+        groups: "{{ mygroup }}"
+        append: true

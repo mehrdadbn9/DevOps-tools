@@ -1,0 +1,13 @@
+---
+- name: file module demo
+  hosts: all
+  vars:
+    myfile: "/root/wordpress/example.txt"
+  become: false
+  tasks:
+    - name: change permission
+      ansible.builtin.file:
+        path: "{{ myfile }}"
+        owner: "root"
+        group: "docker"
+        mode: '0777'

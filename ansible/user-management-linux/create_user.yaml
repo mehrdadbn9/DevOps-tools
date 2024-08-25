@@ -1,0 +1,54 @@
+---
+- name: Create multiple users, set up SSH keys, and set default shell
+  hosts: all
+  become: yes
+
+  vars:
+    users:
+      - username: "mehrdad1"
+        groupname: "sudo"
+        password: "{{ 'mehrdad' | password_hash('sha512') }}"
+        ssh_public_key_file: "/home/mehrdad/devops/ansible/ansible/user-management-linux/id_rsa.pub"
+      # Add more users as needed
+
+  tasks:
+    - name: Ensure the group exists
+      ansible.builtin.group:
+        name: "{{ item.groupname }}"
+        state: present
+      loop: "{{ users }}"
+
+    - name: Create the users with the default shell
+      ansible.builtin.user:
+        name: "{{ item.username }}"
+        groups: "{{ item.groupname }}"
+        password: "{{ item.password }}"
+        state: present
+        shell: "/bin/bash"
+        create_home: yes
+      loop: "{{ users }}"
+
+    - name: Set up .ssh directory for the users
+      ansible.builtin.file:
+        path: "/home/{{ item.username }}/.ssh"
+        state: directory
+        mode: '0700'
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+      loop: "{{ users }}"
+
+    - name: Add the public key to the authorized_keys file
+      ansible.builtin.copy:
+        src: "{{ item.ssh_public_key_file }}"
+        dest: "/home/{{ item.username }}/.ssh/authorized_keys"
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: '0600'
+      loop: "{{ users }}"
+    
+    # - name: Add the public key to the authorized_keys file
+    #   ansible.posix.authorized_key:
+    #     user: "{{ item.username }}"
+    #     key: "{{ lookup('file', item.ssh_public_key_file) }}"
+    #     remote_src: yes
+    #   loop: "{{ users }}"

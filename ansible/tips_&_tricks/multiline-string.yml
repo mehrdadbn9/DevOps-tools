@@ -1,0 +1,24 @@
+# three typr of nultilines output
+---
+- name: debug module demo
+  hosts: all
+  vars:
+    variables1: |
+      exactly will appear what you would see
+      as three line
+      strings will be used
+    variables2: >
+      not exactly will appear what you would see
+      as three line
+      strings will be used, only one would be appeared
+  tasks:
+    - name: print var1
+      ansible.builtin.debug:
+          # shows it in multilines output
+          msg: "{{ variables1.split('\n') }}"
+          
+    - name: print var2
+      ansible.builtin.debug:
+        var: variables2
+# not vars:
+# variables1: |- --> will omit new line at the end of it

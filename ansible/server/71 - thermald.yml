@@ -1,0 +1,15 @@
+---
+- name: thermald demo
+  hosts: all
+  become: true
+  tasks:
+    - name: thermald installed
+      ansible.builtin.package:
+        name: thermald
+        state: present
+
+    - name: thermald running
+      ansible.builtin.service:
+        name: thermald
+        state: started
+        enabled: true

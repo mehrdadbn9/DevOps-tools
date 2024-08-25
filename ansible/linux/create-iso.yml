@@ -1,0 +1,15 @@
+---
+- name: iso_create module demo
+  hosts: all
+  tasks:
+    - name: Create an ISO file
+      community.general.iso_create:
+        src_files:
+          - ~/wordpress/example.txt
+        dest_iso: ~/wordpress/test.iso
+        interchange_level: 3
+        joliet: 3
+#file ~/wordpress/test.iso
+# sudo mount -t iso9660 test.iso /mnt/
+# mount --> shows lastline our iso9660 test.iso
+# sudo umount /mnt/
