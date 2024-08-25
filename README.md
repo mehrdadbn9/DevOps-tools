@@ -5,68 +5,48 @@ This repository contains a collection of DevOps-related tools and scripts for va
 ## Table of Contents
 
 - [Ansible](#ansible)
-- [Azure Pipeline](#azure-pipeline)
 - [Bash](#bash)
+- [CI-CD](#ci-cd)
 - [Docker](#docker)
 - [Iptables](#iptables)
-- [Kubernetes (K8s)](#k8s)
+- [K8s](#k8s)
 - [Linux](#linux)
-- [MinIO](#minio)
 - [Observability](#observability)
-- [Operators](#operators)
+- [Storages](#storages)
 - [Traefik](#traefik)
 - [Vagrant](#vagrant)
 
-## Directories and Files
+## Directories
 
 ### [Ansible](ansible/)
-Contains playbooks and roles to automate various infrastructure tasks using Ansible.
-
-### [Azure Pipeline](azure-pipeline/)
-Contains YAML configurations for setting up CI/CD pipelines using Azure DevOps.
+Ansible automation.
 
 ### [Bash](bash/)
-Scripts written in Bash to automate system administration tasks.
+Bash scripts and utilities.
+
+### [CI-CD](CI-CD/)
+Continuous Integration and Continuous Deployment.
 
 ### [Docker](docker/)
-Dockerfiles and related configurations for containerizing applications.
+Docker containerization.
 
 ### [Iptables](iptables/)
-Configurations and scripts for managing network traffic using iptables.
+Managing network traffic using iptables.
 
-### [Kubernetes (K8s)](k8s/)
-Manifests and Helm charts for deploying applications on Kubernetes.
+### [K8s](k8s/)
+Kubernetes deployments and management.
 
 ### [Linux](linux/)
-Scripts and configurations for Linux system management.
-
-### [MinIO](minio/)
-Set up and manage MinIO, an open-source object storage system.
+Linux system management and administration.
 
 ### [Observability](observability/)
-Tools and scripts for monitoring and logging applications.
+Observability tools.
 
-### [Operators](operators/)
-Kubernetes operators for managing complex applications in a cluster.
+### [Storages](storages/)
+Storage solutions.
 
 ### [Traefik](traefik/)
-Configurations for Traefik, a reverse proxy and load balancer.
+Traefik reverse proxy configuration.
 
 ### [Vagrant](vagrant/)
-Vagrantfile and related configurations to manage development environments with Vagrant.
-
-## Additional Files
-
-### [README.md](README.md)
-This file, providing an overview of the repository's contents.
-
-### [Vagrantfile](Vagrantfile)
-Vagrant configuration file for setting up a development environment.
-
-## Getting Started
-
-Clone this repository to your local machine and explore the directories listed above to find tools and scripts that suit your needs.
-
-```bash
-git clone https://github.com/your-repo/devops-tools.git
-cd devops-tools
+Vagrant for managing development environments.
