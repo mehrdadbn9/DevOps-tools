@@ -1,0 +1,166 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    checksum/config: 6a5bd8b46a70885120056057ba2b06b9b587277bbb03d1a4150d0babe9ccca45
+  creationTimestamp: "2024-06-03T11:25:13Z"
+  generateName: loki-gateway-7f48b566bf-
+  labels:
+    app.kubernetes.io/component: gateway
+    app.kubernetes.io/instance: loki
+    app.kubernetes.io/name: loki
+    pod-template-hash: 7f48b566bf
+  name: loki-gateway-7f48b566bf-mfxmj
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: loki-gateway-7f48b566bf
+    uid: aad725bf-7ed6-44d0-a8c1-8e51ba05f669
+  resourceVersion: "827803"
+  uid: 3f034cf3-9502-4c15-88f7-32ac9047e8c8
+spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/component: gateway
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - image: docker.io/nginxinc/nginx-unprivileged:1.24-alpine
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    ports:
+    - containerPort: 8080
+      name: http-metrics
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /
+        port: http-metrics
+        scheme: HTTP
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/nginx
+      name: config
+    - mountPath: /tmp
+      name: tmp
+    - mountPath: /docker-entrypoint.d
+      name: docker-entrypoint-d-override
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-pdtrc
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: kind-worker
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext:
+    fsGroup: 101
+    runAsGroup: 101
+    runAsNonRoot: true
+    runAsUser: 101
+  serviceAccount: loki
+  serviceAccountName: loki
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - configMap:
+      defaultMode: 420
+      name: loki-gateway
+    name: config
+  - emptyDir: {}
+    name: tmp
+  - emptyDir: {}
+    name: docker-entrypoint-d-override
+  - name: kube-api-access-pdtrc
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:25:50Z"
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:25:13Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:25:13Z"
+    message: 'containers with unready status: [nginx]'
+    reason: ContainersNotReady
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:25:13Z"
+    message: 'containers with unready status: [nginx]'
+    reason: ContainersNotReady
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:25:13Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://4d55da75da5886ce00987863d31de861a27189a8fd93aa57372d37e949958f85
+    image: docker.io/nginxinc/nginx-unprivileged:1.24-alpine
+    imageID: docker.io/nginxinc/nginx-unprivileged@sha256:be76a26e238d9242d1778d39fd0c5a0e4676408870ed56063d4062ba654b1e4e
+    lastState: {}
+    name: nginx
+    ready: false
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2024-06-03T11:30:44Z"
+  hostIP: 172.18.0.2
+  hostIPs:
+  - ip: 172.18.0.2
+  phase: Running
+  podIP: 10.244.2.2
+  podIPs:
+  - ip: 10.244.2.2
+  qosClass: BestEffort
+  startTime: "2024-06-03T11:25:13Z"

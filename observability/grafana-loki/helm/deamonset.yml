@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: loki-promtail
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+      - name: promtail
+        image: docker.io/grafana/promtail:2.9.3
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "100m"
+          limits:
+            memory: "500Mi"
+            cpu: "200m"
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+          fsGroup: 0
+          capabilities:
+            add:
+              - SYS_RESOURCE
+        env:
+        - name: PROMTAIL_MAX_OPEN_FILES
+          value: "1048576"
+      nodeSelector:
+        kubernetes.io/hostname: kind-control-plane

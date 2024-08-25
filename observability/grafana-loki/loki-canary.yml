@@ -1,0 +1,184 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2024-06-03T11:25:13Z"
+  generateName: loki-canary-
+  labels:
+    app.kubernetes.io/component: canary
+    app.kubernetes.io/instance: loki
+    app.kubernetes.io/name: loki
+    controller-revision-hash: 747c4d64b8
+    pod-template-generation: "1"
+  name: loki-canary-fx26p
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: DaemonSet
+    name: loki-canary
+    uid: 858477e0-90f8-4285-a969-6b821cf69754
+  resourceVersion: "827984"
+  uid: b16308ad-7abf-46a1-9b3b-2999ac9b6286
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchFields:
+          - key: metadata.name
+            operator: In
+            values:
+            - kind-worker2
+  containers:
+  - args:
+    - -addr=loki-gateway.default.svc.cluster.local.:80
+    - -labelname=pod
+    - -labelvalue=$(POD_NAME)
+    - -user=self-monitoring
+    - -tenant-id=self-monitoring
+    - -pass=
+    - -push=true
+    env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    image: focker.ir/grafana/loki-canary:3.0.0
+    imagePullPolicy: IfNotPresent
+    name: loki-canary
+    ports:
+    - containerPort: 3500
+      name: http-metrics
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /metrics
+        port: http-metrics
+        scheme: HTTP
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-jm6gp
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: kind-worker2
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext:
+    fsGroup: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+    runAsUser: 10001
+  serviceAccount: loki-canary
+  serviceAccountName: loki-canary
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/disk-pressure
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/memory-pressure
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/pid-pressure
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/unschedulable
+    operator: Exists
+  volumes:
+  - name: kube-api-access-jm6gp
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:25:51Z"
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:25:13Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:29:14Z"
+    message: 'containers with unready status: [loki-canary]'
+    reason: ContainersNotReady
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:29:14Z"
+    message: 'containers with unready status: [loki-canary]'
+    reason: ContainersNotReady
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-03T11:25:13Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://936d566d8285a4b229627781865f2b7cf49b06d136364155ffd7f3392f0898b5
+    image: focker.ir/grafana/loki-canary:3.0.0
+    imageID: docker.io/grafana/loki-canary@sha256:28d7c00588aa43d24b84fce49a8c39e11eaadf5011c3460e64c81490fcfd963d
+    lastState:
+      terminated:
+        containerID: containerd://936d566d8285a4b229627781865f2b7cf49b06d136364155ffd7f3392f0898b5
+        exitCode: 137
+        finishedAt: "2024-06-03T11:28:52Z"
+        reason: Error
+        startedAt: "2024-06-03T11:27:16Z"
+    name: loki-canary
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      waiting:
+        message: back-off 5m0s restarting failed container=loki-canary pod=loki-canary-fx26p_default(b16308ad-7abf-46a1-9b3b-2999ac9b6286)
+        reason: CrashLoopBackOff
+  hostIP: 172.18.0.3
+  hostIPs:
+  - ip: 172.18.0.3
+  phase: Running
+  podIP: 10.244.1.3
+  podIPs:
+  - ip: 10.244.1.3
+  qosClass: BestEffort
+  startTime: "2024-06-03T11:25:13Z"
