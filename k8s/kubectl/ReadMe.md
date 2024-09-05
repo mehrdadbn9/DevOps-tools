@@ -9,6 +9,13 @@ Update the apt package index and install packages needed to use the Kubernetes a
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
 ```
+or  easy one is:
+```bash 
+wget https://dl.k8s.io/release/$(wget -qO - https://dl.k8s.io/release/
+stable.txt)/bin/linux/amd64/kubectl
+
+sudo install -m 755 kubectl /usr/local/bin/kubectl
+```
 
 Download the Google Cloud public signing key:
 
@@ -47,7 +54,8 @@ Enable kubectl autocompletion:
 
 ```bash
 echo 'source <(kubectl completion bash)' >>~/.bashrc
-kubectl completion bash >/etc/bash_completion.d/kubect
+echo 'source <(kubectl completion bash)' >>~/.zshrc
+kubectl completion bash >/etc/bash_completion.d/kubectl
 ```
 
 If you have an alias for kubectl, you can extend shell completion to work with that alias:
@@ -55,6 +63,8 @@ If you have an alias for kubectl, you can extend shell completion to work with t
 ```bash
 echo 'alias k=kubectl' >>~/.bashrc
 echo 'complete -F __start_kubectl k' >>~/.bashrc
+echo 'alias k=kubectl' >>~/.zshrc
+echo 'complete -F __start_kubectl k' >>~/.zshrc
 ```
 
 Good alias:
@@ -110,7 +120,26 @@ These checks are selected based on security recommendations and best practices, 
 - Defining resource requests and limits.
 
 Installation:
+krew:
+#### [Krew](https://github.com/kubernetes-sigs/krew) is the plugin manager for kubectl command-line tool.
+Installation:
 
+```bash
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/download/v0.4.4/krew-linux_amd64.tar.gz" &&
+  mv krew-linux_amd64.tar.gz krew.tar.gz
+  tar zxvf krew.tar.gz &&
+  KREW=./krew-"${OS}_${ARCH}" &&
+  "$KREW" install krew &&
+  echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.bashrc &&
+  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+  echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.zshrc &&
+  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+)
+```
 ```bash
 kubectl krew install score
 ```
@@ -135,28 +164,6 @@ Installation:
 ```bash
 sudo apt-get install fzf
 ```
-
-#
-#### [Krew](https://github.com/kubernetes-sigs/krew) is the plugin manager for kubectl command-line tool.
-Installation:
-
-```bash
-(
-  set -x; cd "$(mktemp -d)" &&
-  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
-  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
-  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/download/v0.4.4/krew-linux_amd64.tar.gz" &&
-  mv krew-linux_amd64.tar.gz krew.tar.gz
-  tar zxvf krew.tar.gz &&
-  KREW=./krew-"${OS}_${ARCH}" &&
-  "$KREW" install krew &&
-  echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.bashrc &&
-  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-  echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.zshrc &&
-  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-)
-```
-
 #
 #### [kubectx + kubens:](https://github.com/ahmetb/kubectx) Power tools for kubectl.
 
@@ -182,14 +189,16 @@ alias kubectx="kubectl ctx"
 
 # kubens
 alias kns="kubectl ns"
-alias kubens="kubectl ns"
-'  >> ~/.bashrc
+alias kubens="kubectl ns" >> ~/.bashrc
+alias kubens="kubectl ns" >> ~/.zshrc
+alias kns="kubectl ns" >> ~/.zshrc
+
 ```
 #
 ### [kube-ps1:](https://github.com/jonmosco/kube-ps1) Kubernetes prompt for bash and zsh.
 
 A script that lets you add the current Kubernetes context and namespace configured on kubectl to your Bash/Zsh prompt strings (i.e. the $PS1).
-
+If you're working with multiple Kubernetes clusters and namespaces, this setup is highly useful. It allows you to immediately see which Kubernetes context and namespace you're in, reducing the risk of running commands in the wrong cluster or namespace.
 
 add this line on ~/.zshrc
 
@@ -279,10 +288,8 @@ Demo:
 ![kubecolor](../../images/kubecolor.png "kubecolor")
 
 #### Others good Tips
-- [kubectl-df-pv:](https://github.com/yashbhutwala/kubectl-df-pv) A kubectl plugin to see df for persistent volumes.
-- [kubectl-images:](https://github.com/chenjiandongx/kubectl-images) Show container images used in the cluster
+- [kubectl-df-pv:](https://github.com/yashbhutwala/kubectl-df-pv) A kubectl plugin to see df for persistent volumes. [x]
+- [kubectl-images:](https://github.com/chenjiandongx/kubectl-images) Show container images used in the cluster [x]
 - [kurt:](https://github.com/soraro/kurt) KUbernetes Restart Tracker
 - [kubent:](https://github.com/doitintl/kube-no-trouble) Easily check your clusters for use of deprecated APIs
-
-
-
+![after installing plugin and command k](image.png)
