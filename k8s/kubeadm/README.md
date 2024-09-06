@@ -54,9 +54,9 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.d
 cat /etc/apt/sources.list.d/docker.list
 ```
 
-If apt mirror repository, add this line instead. We are using mirror repository `repo.mecan.ir`
+If apt mirror repository, add this line instead. We are using mirror repository `repo.kubeadm.ir`
 ```bash
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://repo.mecan.ir/repository/debian-docker bookworm stable" > /etc/apt/sources.list.d/docker.list
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://repo.kubeadm.ir/repository/debian-docker bookworm stable" > /etc/apt/sources.list.d/docker.list
 cat /etc/apt/sources.list.d/docker.list
 ```
 
@@ -88,13 +88,13 @@ If using Docker and other registry mirror, add these lines after registry.mirror
 
 ```bash
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
-          endpoint = ["https://hub.mecan.ir"]
+          endpoint = ["https://hub.kubeadm.ir"]
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
-          endpoint = ["https://k8s.mecan.ir"]
+          endpoint = ["https://k8s.kubeadm.ir"]
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
-          endpoint = ["https://quay.mecan.ir"]
+          endpoint = ["https://quay.kubeadm.ir"]
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."mirror.gcr.io"]
-          endpoint = ["https://gcr.mecan.ir"]
+          endpoint = ["https://gcr.kubeadm.ir"]
 ```
 
 
@@ -107,9 +107,9 @@ DIR_PATH=/etc/systemd/system/containerd.service.d
 # Create config file
 cat <<EOF >${DIR_PATH}/http-proxy.conf
 [Service]
-Environment="HTTP_PROXY=http://asir.mecan.ir:8123"
-Environment="HTTPS_PROXY=http://asir.mecan.ir:8123"
-Environment="NO_PROXY=localhost,127.0.0.1,10.233.0.0/18,10.233.64.0/18,.mecan.ir"
+Environment="HTTP_PROXY=http://.kubeadm.ir:8123"
+Environment="HTTPS_PROXY=http://.kubeadm.ir:8123"
+Environment="NO_PROXY=localhost,127.0.0.1,10.233.0.0/18,10.233.64.0/18,.kubeadm.ir"
 EOF
 
 # Check config file
@@ -164,9 +164,9 @@ cat /etc/apt/sources.list.d/kubernetes.list
 apt-get update -y
 ```
 
-If apt mirror repository, add this line instead. We are using mirror repository `repo.mecan.ir`
+If apt mirror repository, add this line instead. We are using mirror repository `repo.kubeadm.ir`
 ```bash
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://repo.mecan.ir/repository/debian-kubernetes/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://repo.kubeadm.ir/repository/debian-kubernetes/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 cat /etc/apt/sources.list.d/kubernetes.list
 apt-get update -y
 ```
@@ -398,6 +398,16 @@ You can now join any number of machines by running the following on each node
 as root:
 
   kubeadm join <control-plane-host>:<control-plane-port> --token <token> --discovery-token-ca-cert-hash sha256:<hash>
+```
+or
+```
+ sudo kubeadm init --apiserver-advertise-address=$IPADDR \
+--apiserver-cert-extra-sans=$IPADDR \
+--pod-network-cidr=$POD_CIDR \
+--node-name $NODENAME \
+--ignore-preflight-errors Swap
+
+kubectl get --raw='/readyz?verbose'
 ```
 
 ##### After initializing master1 run these commands for create kubectl config file and check kubernetes ca certificate:
