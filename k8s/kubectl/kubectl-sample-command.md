@@ -105,3 +105,43 @@ kubectl get secrets
 kubectl describe secret
 kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
 ```
+
+kubectl delete all --all -n <namespace>
+
+kubectl explain svc --> from swagger explain it
+
+kubectl explain svc.spec.externalIPs
+
+Automatically create an associated service with --expose.
+Test a run without actually running anything with --dry-run=client.
+kubectl run myshell --image=busybox:1.36
+
+--command -- sh -c "sleep 3600"
+
+@deployment
+Define the number of replicas using --replicas.
+Provide the created manifest using --output yaml.
+
+kubectl create deployment fancyapp --image nginx:1.25.2 -o yaml \
+--dry-run=client
+
+# wanna get manifest created from an image and get blueprint to start
+kubectl create deployment fancyapp --image nginx:1.25.2 -o yaml \
+--dry-run=client 
+
+# update a deployment
+kubectl set image deployment/myapp \
+hello-app=gcr.io/google-samples/hello-app:2.0
+
+kubectl rollout status deployment myapp
+
+You can specify a
+change cause for a revision by using a special annotation. The following is an example
+of setting a change cause for the most recent revision:
+kubectl annotate deployment/myapp \
+kubernetes.io/change-cause="Added port definition."
+
+Use kubectl patch to update a specific key—for example:
+kubectl patch deployment myapp -p '{"spec": {"template":
+{"spec": {"containers":
+[{"name": "sise", "image": "gcr.io/google-samples/hello-app:2.0"}]}}}}'
