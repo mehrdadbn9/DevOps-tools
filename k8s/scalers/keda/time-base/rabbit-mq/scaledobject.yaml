@@ -1,0 +1,16 @@
+# scaledobject.yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: rabbitmq-scaledobject
+spec:
+  scaleTargetRef:
+    name: rabbitmq-consumer
+  minReplicaCount: 0
+  maxReplicaCount: 10
+  triggers:
+  - type: rabbitmq
+    metadata:
+      host: amqp://user:rhG6XQ9ZtscpFlpu@rabbitmq.rabbitmq.svc.cluster.local:5672/
+      queueName: task_queue
+      queueLength: "5"

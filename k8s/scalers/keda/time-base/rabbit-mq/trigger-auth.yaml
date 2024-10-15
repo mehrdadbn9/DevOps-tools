@@ -1,0 +1,10 @@
+# trigger-auth.yaml
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: rabbitmq-trigger-auth
+spec:
+  secretTargetRef:
+  - parameter: password
+    name: rabbitmq-secret
+    key: rhG6XQ9ZtscpFlpu

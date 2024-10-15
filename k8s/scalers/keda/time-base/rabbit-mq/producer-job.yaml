@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rabbitmq-producer
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+      - name: producer
+        image: focker.ir/python:3.9
+        command: ["python", "-u", "-c"]
+        args:
+          - |
+            import pika
+            import os
+            connection = pika.BlockingConnection(pika.ConnectionParameters(
+                host=os.environ['RABBITMQ_HOST'],
+                port=5672,
+                credentials=pika.PlainCredentials('user', os.environ['RABBITMQ_PASSWORD'])
+            ))
+            channel = connection.channel()
+            channel.queue_declare(queue='task_queue')
+            for i in range(100):
+                channel.basic_publish(exchange='', routing_key='task_queue', body='Hello World!')
+                print(f" [x] Sent 'Hello World!' {i+1}")
+            connection.close()
+        env:
+        - name: RABBITMQ_HOST
+          value: rabbitmq.rabbitmq.svc.cluster.local
+        - name: RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq
+              key: rabbitmq-password
+      restartPolicy: Never
+  backoffLimit: 4
