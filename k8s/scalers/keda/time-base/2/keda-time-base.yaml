@@ -1,0 +1,21 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: nginx-deployment
+    kind: Deployment
+    apiVersion: apps/v1
+  minReplicaCount: 2
+  maxReplicaCount: 3
+  cooldownPeriod: 30
+  triggers:
+  - type: cron
+    metadata:
+      # Required
+      timezone: Asia/Tehran  # from the IANA Time Zone Database.
+      start: 6 1 * * *        
+      end: 20 1 * * *         
+      desiredReplicas: "3"

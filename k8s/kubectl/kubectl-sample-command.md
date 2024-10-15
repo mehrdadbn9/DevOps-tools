@@ -123,7 +123,7 @@ Define the number of replicas using --replicas.
 Provide the created manifest using --output yaml.
 
 kubectl create deployment fancyapp --image nginx:1.25.2 -o yaml \
---dry-run=client
+--dry-run=client  # deprecated recently
 
 # wanna get manifest created from an image and get blueprint to start
 kubectl create deployment fancyapp --image nginx:1.25.2 -o yaml \
@@ -144,4 +144,8 @@ kubernetes.io/change-cause="Added port definition."
 Use kubectl patch to update a specific key—for example:
 kubectl patch deployment myapp -p '{"spec": {"template":
 {"spec": {"containers":
-[{"name": "sise", "image": "gcr.io/google-samples/hello-app:2.0"}]}}}}'
+[{"name": "size", "image": "gcr.io/google-samples/hello-app:2.0"}]}}}}'
+
+## scale
+
+`kubectl scale --replicas=<count> deployment/<deployment_name>` Scale a deployment to a specified number of replicas
