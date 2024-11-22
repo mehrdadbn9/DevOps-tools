@@ -376,3 +376,139 @@ helm install myapp902 stacksimplify/mychart1 --set service.nodePort=31232
 helm install myapp902 stacksimplify/mychart1 --set service.nodePort=null --dry-run --debug
 helm install myapp902 stacksimplify/mychart1 --set service.nodePort=null 
 
+# default and indent
+
+    # ***default Function ****
+    app.kubernetes.io/name: {{ default "MYRELEASE101" .Values.releaseName | lower }}
+    # Controlling Leading and Trailing White spaces 
+    leading-whitespace: "   {{- .Chart.Name }}    helm-dev"
+    trailing-whitespace: "   {{ .Chart.Name -}}    helm-dev"
+    leadtrail-whitespace: "   {{- .Chart.Name -}}    helm-dev"   
+    # indent function
+    indenttest: "  {{- .Chart.Name | indent 4 -}}  "  
+    # nindent function
+    nindenttest: "  {{- .Chart.Name | nindent 4 -}}  "        
+
+# Helm Development - Flow Control If-Else
+
+- [Additional Reference: Operators are functions](https://helm.sh/docs/chart_template_guide/functions_and_pipelines/#operators-are-functions)
+
+### IF-ELSE Syntax
+```t
+{{ if PIPELINE }}
+  # Do something
+{{ else if OTHER PIPELINE }}
+  # Do something else
+{{ else }}
+  # Default case
+{{ end }}
+```
+## Step: Logic and Flow Control Function: and 
+- [Logic and Flow Control Functions](https://helm.sh/docs/chart_template_guide/function_list/#logic-and-flow-control-functions)
+
+## Step-04: Implement if-else for replicas
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
+  labels:
+    app: nginx
+spec:
+## **
+{{- if eq .Values.myapp.env "prod" }}
+  replicas: 4 
+{{- else if eq .Values.myapp.env "qa" }}  
+  replicas: 2
+{{- else }}  
+  replicas: 1
+{{- end }}  
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: ghcr.io/stacksimplify/kubenginx:4.0.0
+        ports:
+        - containerPort: 80
+```
+# Helm Template (when env: dev or env: null using --set)
+## TEST ELSE STATEMENT
+helm template myapp1 . --set myapp.env=dev
+
+# Helm Install Dry-run 
+helm install myapp1 . --dry-run
+
+# Helm Install
+helm install myapp1 . --atomic
+
+# Verify Pods
+helm status myapp1 --show-resources
+
+# Uninstall Release
+helm uninstall myapp1
+
+# Helm Development - Flow Control If-Else with OR Function
+
+## Step: Logic and Flow Control Function: and 
+- [Logic and Flow Control Functions](https://helm.sh/docs/chart_template_guide/function_list/#logic-and-flow-control-functions)
+- **or:**  Returns the boolean OR of two or more arguments (the first non-empty argument, or the last argument).
+```t
+# and Syntax
+or .Arg1 .Arg2
+
+```
+## Step: Implement if-else for replicas with OR 
+
+spec:
+{{- if or (eq .Values.myapp.env "prod") (eq .Values.myapp.env "uat") }}
+  replicas: 6
+{{- else if eq .Values.myapp.env "qa" }}  
+  replicas: 2
+{{- else }}  
+  replicas: 1  
+{{- end }}
+
+
+# Helm Development - Flow Control If-Else
+
+## Step: Introduction
+-  We can use `if/else` for creating conditional blocks in Helm Templates
+- **eq:** For templates, the operators (eq, ne, lt, gt, and, or and so on) are all implemented as functions. 
+- In pipelines, operations can be grouped with parentheses ((, and )).
+- [Additional Reference: Operators are functions](https://helm.sh/docs/chart_template_guide/functions_and_pipelines/#operators-are-functions)
+
+spec:
+{{- if not (eq .Values.myapp.env "prod") }}
+  replicas: 1
+{{- else }}  
+  replicas: 6
+{{- end }}
+
+# Helm Development - Flow Control With 
+
+
+## Step: Introduction
+- `with` action controls variable scoping. 
+- `with` action can allow you to set the current scope (.) to a particular object.
+### with action Syntax
+```t
+{{ with PIPELINE }}
+  # restricted scope
+{{ end }}
+```
+
+## Step: Review values.yaml
+```yaml
+# For testing Flow Control: with 
+podAnnotations: 
+  appName: myapp1
+  appType: webserver
+  appTech: HTML
+```
+

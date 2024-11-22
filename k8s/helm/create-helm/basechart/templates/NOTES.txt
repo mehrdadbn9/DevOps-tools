@@ -1,4 +1,4 @@
-{{/* Root or Dot or Period Object 
+{{/* Root or Dot or Period Object
 Root Object: {{ . }}
 */}}
 
