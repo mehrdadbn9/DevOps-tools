@@ -512,3 +512,314 @@ podAnnotations:
   appTech: HTML
 ```
 
+## Step: Add $ to Root Object
+- To access Root Objects inside `with` action block we need to prepend that Root object with `$`
+```t
+# To Access Root Object
+       appManagedBy: {{ $.Release.Service }}
+
+ # Change to Chart Directory
+cd helmbasics  
+
+# Helm Template
+helm template myapp101 .
+
+# Helm Install with dry-run
+helm install myapp101 . --dry-run  
+
+# Observation:
+1. It should work as expected
+      annotations:
+        appName: myapp1
+        appTech: HTML
+        appType: webserver
+        appManagedBy: Helm  
+```
+## Step: Scope more detailed for "with" action block
+- How to retrieve a single object from `.Values.myapps.data.config` ?
+- What if there is only need for 1 or 2 values from `.Values.myapps.data.config` ?
+- How to access each key value from `.Values.myapps.data.config` ?
+```yaml
+# values.yaml
+# For testing Flow Control: with - Scope more detailed
+myapps:
+  data: 
+    config: 
+      appName: myapp1
+      appType: webserver
+      appTech: HTML
+      appDb: mysql
+
+# Current Scope: Retrieve single object using scope
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
+data: 
+{{- with .Values.myapps.data.config }}
+  application-name: {{ .appName }}
+  application-type: {{ .appType }}
+{{- end}} 
+
+# Observation:
+1. We should be able to get values for {{ .appName }} and {{ .appType }}
+```
+
+# Helm Development - Variables
+
+## Step: Introduction
+- How to use Variables ?
+
+## Step: Variables in Helm Templates
+```yaml
+# Change-1: Add Variable at the top of deployment template
+{{- $chartname := .Chart.Name -}}
+
+# Change-2: Add appHelmChart annotation with variable in deployment.yaml
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+        appManagedBy: {{ $.Release.Service }}
+        appHelmChart: {{ $chartname }}        
+      {{- end }}  
+
+# Change to Chart Directory
+cd helmbasics  
+
+# Helm Template
+helm template myapp101 .
+
+# Helm Install with dry-run
+helm install myapp101 . --dry-run  
+
+# Observation:
+We should see variable value substituted successfully
+
+# Helm get manifest
+helm get manifest myapp101
+```
+# Helm Development - Flow Control Range Action with List
+
+## Step: Introduction
+- Implement `Range` with `List of Values` from `values.yaml`
+- Implement on how to call `Helm Variable` in Range loop
+ 
+## Step2: Implement "Range Action" with "List of Values"
+- **Source Location:** backupfiles/namespace.yaml
+- **Destication Location:** helmbasics/templates/namespace.yaml
+- **File Name:** namespace.yaml
+```t
+# values.yaml
+# Flow Control: Range with List
+namespaces:
+  - name: myapp1
+  - name: myapp2
+  - name: myapp3
+
+# Range with List
+{{- range .Values.namespaces }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .name }}
+---  
+{{- end }}
+```
+ >>>apiVersion: v1
+kind: Namespace
+metadata:  
+  name: myapp1
+---
+apiVersion: v1
+kind: Namespace
+metadata:  
+  name: myapp2
+---
+apiVersion: v1
+kind: Namespace
+metadata:  
+  name: myapp3
+---
+
+## Step: Implement "Range Action" with "List of Values" with Variables
+- **Source Location:** backupfiles/namespace-with-variable.yaml
+- **Destication Location:** helmbasics/templates/namespace-with-variable.yaml
+- **File Name:** namespace-with-variable.yaml
+```t
+# values.yaml
+# Flow Control: Range with List and Helm Variables
+environments:
+  - name: dev
+  - name: qa
+  - name: uat  
+  - name: prod    
+
+# Range with List
+{{- range $environment := .Values.environments }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $environment.name }}
+---  
+{{- end }}           
+
+## Step: Range with Key Value pairs or Map or Dictionary 
+- **Source Location:** backupfiles/namespace.yaml
+- **Destication Location:** helmbasics/templates/namespace.yaml
+- **File Name:** namespace.yaml
+
+```
+# values.yaml
+# Range with Dictionary
+myapps:
+  config1: 
+    appName: myapp1
+    appType: webserver
+    appTech: HTML
+    appDb: mysql
+  config2: 
+    appName: myapp2
+    appType: webserver
+    appTech: HTML
+    appDb: mysql
+  
+# Range with Dictionary
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-configmap1
+data: 
+{{- range $key, $value := .Values.myapps.config1 }}
+{{- $key | nindent 2}}: {{ $value }}
+{{- end}}  
+
+# List k8s namespaces
+kubectl get configmap
+kubectl get configmap <NAME-OF-CONFIGMAP> -o yaml
+kubectl get configmap myapp1-helmbasics-configmap2 -o yaml
+```
+
+# Helm Development - Named Templates
+
+## Step: Introduction
+- Create Named Template
+- Call the named template using template action
+- Pass Root Object dot (.) to template action provided if we are using Helm builtin objects in our named template
+- For `template call` use `pipelines` and see if it works
+- Replace `template call` with special purpose function `include` in combination with `pipelines` and test it
+
+
+## Step-02: Create a Named Template
+- **File Location:** deployment.yaml
+- Define the below named template in `deployment.yaml`
+```t
+{{/* Common Labels */}}
+{{- define "helmbasics.labels"}}
+    app: nginx
+{{- end }}
+```
+
+## Step: Call the named template using template action
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-deployment 
+  labels:
+  {{- template "helmbasics.labels" }}
+```
+
+## Step: Add one Builtin Object Chart.Name to labels
+```t
+{{/* Common Labels */}}
+{{- define "helmbasics.labels"}}
+    app: nginx
+    chartname: {{ .Chart.Name }}
+{{- end }}
+```
+
+## Step: Test the output with template action
+```t
+# Change to Chart Directory 
+cd helmbasics
+
+# Helm Template Command
+helm template myap101 .
+
+# Helm Install with dry-run command
+helm install myapp101 . --dry-run
+Observation:
+1. Chart name filed should be empty
+2. Chart Name was not in the scope for our defined template.
+3. When a named template (created with define) is rendered, it will receive the scope passed in by the template call. 
+4. * No scope was passed in, so within the template we cannot access anything in "."
+5. * This is easy to fix. We simply pass a scope to the template
+```
+
+## Step: Pass scope to the template call
+- Add dot "." (Root Object or period) at the end of template call to pass scope to template call
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-deployment # Action Element
+  labels:
+  {{- template "helmbasics.labels" . }}
+```
+## Step: Pipe an Upper function to template 
+```t
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-deployment # Action Element
+  labels:
+  {{- template "helmbasics.labels" . | upper }}
+```
+
+## Step: Test the output when template action + pipe + upper function
+```t
+# Change to Chart Directory 
+cd helmbasics
+
+# Helm Template Command
+helm template myap101 .
+
+# Helm Install with dry-run command
+helm install myapp101 . --dry-run
+Observation:
+1. Should fail with error. What is the reason for failure ?
+2. Template is an action, and not a function, there is no way to pass the output of a template call to other functions; 
+```
+## Step: Replace Template action with Special Purpose include function
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-deployment # Action Element
+  labels:
+  {{- include "helmbasics.labels" . | upper }}
+```
+# Helm Printf Function
+
+## Step: Introduction
+- **[printf](https://helm.sh/docs/chart_template_guide/function_list/#printf):** Returns a string based on a formatting string and the arguments to pass to it in order.
+
+
+## Step: Create a Named Template with printf function
+```t
+{{/* Kubernetes Resource Name: String Concat with Hyphen */}}
+{{- define "helmbasics.resourceName" }}
+{{- printf "%s-%s" .Release.Name .Chart.Name }}
+{{- end }}
+```
+
+## Step: Call the named template in deployment.yaml
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helmbasics.resourceName" . }}-deployment 
+  labels:
+```
