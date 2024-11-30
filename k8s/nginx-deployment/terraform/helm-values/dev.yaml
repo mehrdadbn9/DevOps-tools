@@ -1,0 +1,11 @@
+values = [
+  file("${path.module}/env/${var.environment}.yaml")
+]
+
+# fullnameOverride: "nginx-helm"
+# nameOverride: "nginx"
+# service:
+#   port: 80
+#   type: ClusterIP
+
+# replicaCount: 2

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: nginx-ingress
+description: A Helm Chart for Nginx Ingress
+version: 0.1.0
+appVersion: "1.0.0"

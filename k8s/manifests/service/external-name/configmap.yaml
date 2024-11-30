@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-config
+data:
+  DATABASE_URL: "external-database-service"
+  CONNECTION_TIMEOUT: "30"

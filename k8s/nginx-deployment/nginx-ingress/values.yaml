@@ -1,0 +1,27 @@
+appName: nginx-app
+
+service:
+  port: 80
+
+ingress:
+  host: nginx.local
+  controller:
+    service:
+      type: NodePort
+      nodePorts:
+        http: 30080
+        https: 30443
+
+    image:
+      registry: focker.ir
+      image: ingress-nginx/controller
+      tag: "v1.9.1"  # Updated to a valid tag
+
+    admissionWebhooks:
+      enabled: false
+      patch:
+        image:
+          registry: focker.ir
+          image: ingress-nginx/kube-webhooaack-certgen
+          tag: "v1.4.4"  # Updated if necessary
+          digest: null

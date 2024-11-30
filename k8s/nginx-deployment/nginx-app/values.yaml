@@ -1,0 +1,63 @@
+replicaCount: 1
+
+image:
+  repository: nginx
+  tag: "1.24.0"
+
+nameOverride: ""
+fullnameOverride: "nginx-app"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  host: nginx.local
+
+configmap:
+  enabled: true
+  nginxConfig: |
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx.pid;
+
+    events {
+      worker_connections  1024;
+    }
+
+    http {
+      include       /etc/nginx/mime.types;
+      default_type  application/octet-stream;
+
+      log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                       '$status $body_bytes_sent "$http_referer" '
+                       '"$http_user_agent" "$http_x_forwarded_for"';
+
+      access_log  /var/log/nginx/access.log  main;
+
+      sendfile        on;
+      keepalive_timeout  65;
+
+      server {
+        listen 80;
+        server_name nginx.local;
+
+        location = /salam {
+          add_header Content-Type application/json;
+          return 200 '{"message": "Salam!"}';
+        }
+
+        location = /khodafez {
+          add_header Content-Type application/json;
+          return 200 '{"message": "Khodafez!"}';
+        }
+
+        location / {
+          add_header Content-Type application/json;
+          return 404 '{"error": "Not Found"}';
+        }
+      }
+    }
