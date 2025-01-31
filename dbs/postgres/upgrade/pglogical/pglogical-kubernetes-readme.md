@@ -107,4 +107,3 @@ Contributions are welcome! Please submit pull requests or open issues to improve
 - pglogical Extension Developers
 
 ---
-
