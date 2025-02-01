@@ -92,10 +92,6 @@ The replication is configured with the following key parameters:
 - Maximum WAL senders: 10
 - `pglogical` shared preload library
 
-## Contributing
-
-Contributions are welcome! Please submit pull requests or open issues to improve the project.
-
 ## License
 
 [Specify your license here, e.g., MIT, Apache 2.0]
